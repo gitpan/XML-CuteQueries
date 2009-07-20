@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               XML-CuteQueries
-version:            0.6000
+version:            0.6001
 abstract:           ~
 author:  []
 license:            LGPL
@@ -10,8 +10,9 @@ configure_requires:
 build_requires:
     ExtUtils::MakeMaker:  0
 requires:
-    perl:       5.006
-    XML::Twig:  0
+    Class::Accessor:  0
+    perl:             5.006
+    XML::Twig:        0
 resources:
     repository:  http://github.com/jettero/xml--cutequeries
 no_index:
