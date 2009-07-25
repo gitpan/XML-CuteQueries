@@ -159,6 +159,89 @@ L</OPTIONS> for the full story on options.
     # return the first match, presuming there may be more than
     # one <field_name>
 
+At the risk of making something simple into something complicated, there are
+several scalar sub-types.
+
+=over 4
+
+=item B<recurse_text()>
+
+By default, CQ will only return the text from the matched node when requesting
+scalar-type results.  If you'd like to return all the text, use this scalar
+query sub-type instead.
+
+    my $CQ = XML::CuteQueries
+     ->new->parse("<r><p>Slow <em>down</em> there dude.</p></r>");
+
+    my $r1 = $CQ->cute_query(p=>'');
+    # Slow  there dude.
+
+    my $r2 = $CQ->cute_query(p=>'recurse_text()');
+    # Slow down there dude.
+
+There are several synonyms for this:
+
+    # all the same as $r2
+    my $same = $CQ->cute_query(p=>'a');
+    my $same = $CQ->cute_query(p=>'all');
+    my $same = $CQ->cute_query(p=>'all()');
+    my $same = $CQ->cute_query(p=>'all_text()');
+    my $same = $CQ->cute_query(p=>'r');
+    my $same = $CQ->cute_query(p=>'recurse');
+    my $same = $CQ->cute_query(p=>'recurse()');
+    my $same = $CQ->cute_query(p=>'recurse_text()');
+
+=item B<xml()>
+
+You can also choose to slurp out XML or xhtml using the C<'xml()'> scalar-query
+sub-type.
+
+    my $CQ = XML::CuteQueries
+     ->new->parse("<r><p>Slow <em>down</em> there dude.</p></r>");
+
+    my $r1 = $CQ->cute_query(p=>'');
+    # Slow  there dude.
+
+    my $r2 = $CQ->cute_query(p=>'xml()');
+    # Slow <em>down</em> there dude.
+
+There are several synonyms for this:
+
+    # all the same as $r2
+    my $same = $CQ->cute_query(p=>'x');
+    my $same = $CQ->cute_query(p=>'xml');
+    my $same = $CQ->cute_query(p=>'xml()');
+
+=item B<twig()>
+
+Lastly, if you want to do some twigly powerful things, you can ask for the twig
+elements directly:
+
+    my $CQ = XML::CuteQueries
+     ->new->parse("<r><x>1</x><y>2</y></r>");
+
+    # Print x is 1 and y is 2.
+    my ($x, $y) = $CQ->cute_query('*'=>'twig()');
+    print $x->gi, " is ", $x->xml_string, "\n";
+    print $y->gi, " is ", $y->xml_string, "\n";
+
+Another example:
+
+    my @b = $CQ->cute_query('*'=>'t');
+    $_->set_tag('h1') for @b;
+    $CQ->root->set_tag("html");
+    print $CQ->root->sprint, "\n";
+    # prints this: <html><h1>1</h1><h1>2</h1></html>
+
+There are several synonyms for this:
+
+    # all the same as ($x,$y)
+    my @same = $CQ->cute_query('*'=>'t');
+    my @same = $CQ->cute_query('*'=>'twig');
+    my @same = $CQ->cute_query('*'=>'twig()');
+
+=back
+
 =item B<C<[]>>
 
 The result shape of C<[]> indicates that what you're requesting should point to
@@ -386,24 +469,6 @@ than just the values.
     # match all top level tags and return tag-name/value pairs
 
 This can alternately be invoked by calling L</hash_query()>.
-
-=item B<recurse_text>
-
-By default, CQ will only return the text from the matched node when requesting
-C<''> results.  If you'd like to return all the text, use this option.
-
-    my $CQ = XML::CuteQueries
-     ->new->parse("<r><p>Slow <em>down</em> there dude.</p></r>");
-
-    my $r1 = $CQ->cute_query(p=>'');
-    # Slow  there dude.
-
-    my $r2 = $CQ->cute_query({recurse_text=>1}, p=>'');
-    # Slow down there dude.
-
-Note that CQ doesn't currently support slurping XML (or HTML) from the source
-document.  There are no plans for this either.  If you need it, enter a wishlist
-item on RT.
 
 =item B<notrim>
 
