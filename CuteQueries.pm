@@ -4,7 +4,7 @@ package XML::CuteQueries;
 use strict;
 use warnings;
 
-our $VERSION = '0.6600';
+our $VERSION = '0.6601';
 
 use Scalar::Util qw(reftype blessed);
 use XML::CuteQueries::Error;
@@ -97,8 +97,6 @@ sub _execute_query {
         $kar = 1;
 
         $this->_query_error("[] queries (\"[]$query\") do not make sense outside of klist contexts") unless $context == KLIST;
-        $this->_query_error("[]@ queries (\"[]$query\")are unsupported because <x a='1' a='1'/> isn't valid anyway")
-            if $query =~ m/^[@]/;
     }
 
     my ($re, $nre) = (0,0);
@@ -115,9 +113,11 @@ sub _execute_query {
 
     my @c;
     my $attr_query;
+    my $oquery = $query;
     if( not $rt ) {
-        if( $query =~ m/^\S/ and $query =~ s/\/?\@([\w\d]+|\*)\z// ) {
+        if( $query =~ m/^\S/ and $query =~ s/\@([\w\d]+|\*)\z// ) {
             $attr_query = $1;
+            $query =~ s,(?<=\w)\/$,,;
             @c = $root unless $query;
         }
     }
@@ -132,6 +132,8 @@ sub _execute_query {
 
             return $root->get_xpath($query)
         };
+
+        for(@c) { $_ = $root if $_ == $this }
 
         $this->_query_error("while executing \"$query\": $@") if $@;
         @c = grep {$_->gi !~ m/^#/} @c unless $opts->{nofilter_nontags};
@@ -154,6 +156,27 @@ sub _execute_query {
         }
 
         if( $attr_query ) {
+            if( $kar ) {
+                my %h;
+
+                # NOTE: it's safe to assume we're in KLIST
+
+                my @attr = $attr_query eq "*"
+                         ? do { my %ua; grep { !$ua{$_}++ } map { keys %{$_->{att}} } @c }
+                         : $attr_query;
+
+                for my $attr (@attr) {
+                    push @{$h{$attr}}, $_trimlist->(
+                        map  { $_->{$attr} }
+                        grep { exists $_->{$attr} }
+                        map  { $_->{att} }
+                        @c
+                    );
+                }
+
+                return %h;
+            }
+
             if( $attr_query eq "*" ) {
                 if( $context == KLIST ) {
                     return $_trimhash->( map { %{$_->{att}} } @c );
@@ -177,6 +200,12 @@ sub _execute_query {
                 elsif( $mt eq "x" ) { push @{$h{$_->gi}}, $_->xml_string for @c }
                 elsif( $mt eq "r" ) { push @{$h{$_->gi}}, $_->text       for @c }
                 else                { push @{$h{$_->gi}}, $_->text_only  for @c }
+
+                unless( $mt eq "t" ) {
+                    for my $v (values %h) {
+                        $_trimlist->( @$v );
+                    }
+                }
 
                 return %h;
 
