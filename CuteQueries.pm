@@ -4,7 +4,7 @@ package XML::CuteQueries;
 use strict;
 use warnings;
 
-our $VERSION = '0.6610';
+our $VERSION = '0.6612';
 
 use Carp;
 use Scalar::Util qw(reftype blessed);
@@ -17,9 +17,11 @@ use constant KLIST  => 2;
 use Exporter;
 our @EXPORT_OK = qw(CQ slurp);
 
+# CQ {{{
 sub CQ {
     our $CQ ||= __PACKAGE__->new;
 
+    no warnings 'misc'; ## no critic: yeah, they might do it wrong and pass an odd number, deal with it
     if( my %o = @_ ) {
         my $arg;
         if( $arg = $o{file} ) {
@@ -40,6 +42,7 @@ sub CQ {
 
     return $CQ
 }
+# }}}
 
 our %VALID_OPTS = (map {$_=>1} qw(nostrict nostrict_match nostrict_single nofilter_nontags notrim klist));
 
@@ -234,7 +237,7 @@ sub _execute_query {
         for (@c) {
             my $arr = $h{$_->gi} ||= [];
             # discard all but the last result
-            @$arr = () if $opts->{nostrict_single};
+            @$arr = () if $opts->{nostrict_single} and not $kar;
             push @$arr, $_->$get_value;
             unless ($kar || @$arr == 1) {
                 $this->_data_error($rt, "expected exactly one match-per-tagname for \"$query\", got more")

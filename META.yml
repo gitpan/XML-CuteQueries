@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               XML-CuteQueries
-version:            0.6610
+version:            0.6612
 abstract:           ~
 author:  []
 license:            LGPL
@@ -11,6 +11,7 @@ build_requires:
     ExtUtils::MakeMaker:  0
 requires:
     Class::Accessor:  0
+    Data::Dumper:     0
     perl:             5.006
     XML::Twig:        0
 resources:
