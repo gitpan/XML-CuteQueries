@@ -4,7 +4,7 @@ package XML::CuteQueries;
 use strict;
 use warnings;
 
-our $VERSION = '0.6612';
+our $VERSION = '0.6613';
 
 use Carp;
 use Scalar::Util qw(reftype blessed);
@@ -142,7 +142,7 @@ sub _execute_query {
     my $attr_query;
     my $oquery = $query;
     if( not $rt ) {
-        if( $query =~ m/^\S/ and $query =~ s/\@([\w\d]+|\*)\z// ) {
+        if( $query =~ m/^\S/ and $query =~ s/\@([\w\d:]+|\*)\z// ) {
             $attr_query = $1;
             $query =~ s,(?<=\w)\/$,,;
             @c = $root unless $query;
