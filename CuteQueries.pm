@@ -4,7 +4,7 @@ package XML::CuteQueries;
 use strict;
 use warnings;
 
-our $VERSION = '0.6613';
+our $VERSION = '0.6614';
 
 use Carp;
 use Scalar::Util qw(reftype blessed);
@@ -14,7 +14,7 @@ use base 'XML::Twig';
 use constant LIST   => 1;
 use constant KLIST  => 2;
 
-use Exporter;
+use parent 'Exporter';
 our @EXPORT_OK = qw(CQ slurp);
 
 # CQ {{{
